@@ -1,0 +1,11 @@
+isos/
+*.iso
+*.img
+*.qcow2
+*.vdi
+*.vmdk
+*.log
+.env
+secrets/
+keys/
+
