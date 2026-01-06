@@ -1,85 +1,121 @@
-Day 1: Journal 
+# **Day 1 – SOC Lab Setup**
 
-Goal:
-My goal for today was to create a home lab that would allow me to simulate and train for real-world cybersecurity and SOC scenarios.
+**Goal:**
+Create a home lab that would allow me to simulate and train for real-world cybersecurity and SOC scenarios.
 
-Work Performed:
-Using three different ISO images, I created three virtual machines to simulate a basic network environment:
+**Work Performed:**
 
-SOC Server (soc-server): Intended to act as a centralized monitoring and analysis system.
+* Using three different ISO images, I created three virtual machines to simulate a basic network environment:
 
-Windows Endpoint (windows-endpoint): Simulating a user device within the network.
+  * **SOC Server (soc-server):** Centralized monitoring and analysis system.
+  * **Windows Endpoint (windows-endpoint):** Simulates a typical user device.
+  * **Attacker Machine (ubuntu-attacker):** Simulates a potential threat actor system.
+* I used **VMware** as the hypervisor to host and manage these virtual machines.
+* Enabled **SSH on the SOC server** to allow remote connections from the Ubuntu attacker machine and enable remote administration of the SOC server.
+* Verified network connectivity by **pinging 8.8.8.8** from each VM; all three VMs successfully sent and received packets, confirming internet connectivity.
 
-Attacker Machine (ubuntu-attacker): Simulating a potential threat actor system.
-
-I used VMware as the hypervisor to host and manage these virtual machines.
-
-Understanding that a SOC analyst often needs to access systems remotely, I enabled SSH on the SOC server. This allows the Ubuntu attacker machine to establish remote connections for testing purposes and enables remote administration of the SOC server.
-
-Before proceeding further, I verified network connectivity for each virtual machine by pinging 8.8.8.8. All three VMs successfully sent and received packets, confirming that they were connected to the internet.
-
-Outcome:
+**Outcome:**
 All three virtual machines were successfully created and verified for basic connectivity.
 
-Next Steps:
-On Day 2, I will continue exploring the capabilities of these virtual machines, focusing on endpoint activity, remote access behavior, and system interaction.
+**Next Steps:**
+On Day 2, I will explore the capabilities of these virtual machines further, focusing on endpoint activity, remote access behavior, and system interaction.
 
-Day 2 - 6: 
+---
 
-Days 2–6 – Windows Endpoint VM Exploration & Snapshot Testing
+# **Days 2–6 – Windows Endpoint VM Exploration & Snapshot Testing**
 
-Goal:
-My goal during Days 2–6 was to become more familiar with virtual machines, with a specific focus on the Windows endpoint, as this represents what a typical user system would look like in a real-world environment.
+**Goal:**
+Become familiar with virtual machines, specifically the Windows endpoint, which represents a typical user system in a real-world environment.
 
-Work Performed:
-To evaluate the capabilities and limitations of my Windows VM, I performed a series of realistic user activities. I downloaded and installed an application (DVDStyler), ran and operated the software, and tested exporting data by creating an ISO file intended for DVD burning.
+**Work Performed:**
 
-During this process, I:
+* Evaluated the Windows VM by performing realistic user activities:
 
-Downloaded external video content (a movie I created and uploaded to YouTube).
+  * Downloaded and installed **DVDStyler**.
+  * Created DVD menus and exported content by generating an **ISO file** for DVD burning.
+  * Downloaded external video content (a movie I created and uploaded to YouTube).
+* Operated entirely within the Windows endpoint VM.
 
-Used DVDStyler to design DVD menus.
+**Challenges Encountered:**
 
-Generated an ISO file for removable media creation.
+* DVDStyler lacked certain playback control buttons in the VM environment.
+* Menu previews could not be viewed in VLC as expected.
+* Long-running processes, such as DVD burning, were interrupted when the system entered sleep mode.
 
-Operated entirely within the Windows endpoint virtual machine.
+**Key Observations:**
 
-Challenges Encountered:
-Using a VM introduced several challenges, particularly during media authoring:
+* DVD authoring generates multiple system artifacts:
 
-DVDStyler lacked certain playback control buttons within the VM environment.
+  * Cache files
+  * Temporary directories
+  * Output folders
+* Media authoring tools interact heavily with:
 
-Menu previews were not viewable in VLC as expected.
+  * File system permissions
+  * Directory structures
+  * Large file write operations
+* The Windows endpoint VM handled resource-intensive tasks successfully.
+* Creating ISO files highlighted potential **data exfiltration vectors**.
 
-Long-running processes, such as DVD burning, were interrupted when the system entered sleep mode.
+**SOC Relevance:**
 
-Key Observations:
+* Demonstrated realistic endpoint behavior that analysts must distinguish from malicious actions.
+* Reinforced the importance of **baselining normal user activity** to identify anomalies.
 
-DVD authoring generates multiple system artifacts, including:
+**Snapshot & Recovery Testing:**
 
-Cache files
+* Used a VM snapshot to restore the Windows endpoint to its original state before installing DVDStyler.
+* Demonstrated effective **system recovery** and reinforced the importance of **backups and rollback capabilities** in incident response scenarios.
 
-Temporary directories
+**Outcome:**
+Gained hands-on experience with endpoint behavior, artifact generation, and system recovery in a virtualized environment.
 
-Output folders
+---
 
-Media authoring tools interact heavily with:
+# **Day 7 – Setting up Wazuh SIEM on Ubuntu 24**
 
-File system permissions
+**Goal:**
+Set up a Security Information and Event Management (SIEM) system using the open-source version of Wazuh to simulate SOC operations and manage security events.
 
-Directory structures
+**Work Performed:**
 
-Large file write operations
+1. **Initial Setup:**
 
-The Windows endpoint VM was capable of handling resource-intensive tasks with the current configuration.
+   * Running **Ubuntu 24** on the SOC-server VM.
+   * Initially attempted to install Wazuh 4.11 but encountered installation issues due to limited documentation and resources.
 
-Creating ISO files and removable media highlights potential data exfiltration vectors.
+2. **Successful Installation:**
 
-SOC Relevance:
-From a SOC perspective, this activity demonstrated realistic endpoint behavior that analysts must distinguish from malicious actions. Legitimate user behavior can generate high volumes of file system activity that may appear suspicious without proper context. This testing reinforced the importance of baselining normal endpoint activity.
+   * Used the **official Wazuh installer** and the **all-in-one package**.
+   * The first failed installation was automatically removed, after which the **Wazuh Manager** was installed successfully.
 
-Snapshot & Recovery Testing:
-At the conclusion of testing, I used a VM snapshot to restore the Windows endpoint to its original state prior to installing DVDStyler. This demonstrated the effectiveness of snapshots for system recovery and reinforced the importance of backups and rollback capabilities in incident response scenarios.
+3. **Network Troubleshooting:**
 
-Outcome:
-These exercises provided hands-on experience with endpoint behavior, artifact generation, and system recovery within a virtualized environment.
+   * Attempted to access the Wazuh dashboard via **Google Chrome**, but the page did not load.
+   * Switched the VM network adapter from **NAT to Bridge mode** to share the same subnet as the host PC.
+   * Verified connectivity by **pinging the SOC-server IP** and performing a **port check on 443**, confirming the dashboard port was open.
+
+4. **Dashboard Access:**
+
+   * Using **Safari**, I successfully accessed the Wazuh dashboard.
+   * Attempted login with the admin UUID but realized the password had not been saved.
+
+5. **Password Reset:**
+
+   * Accessed hidden directories on the SOC-server using **root privileges**.
+   * Navigated to `/usr/share/wazuh-dashboard/bin/` to locate **`wazuh-passwords-tool.sh`**.
+   * Executed the tool to **reset the admin password** successfully.
+
+6. **Verification:**
+
+   * Restarted all services (`wazuh-manager`, `opensearch`, `wazuh-dashboard`) to ensure the changes took effect.
+   * Successfully logged in to the **Wazuh dashboard**, confirming full functionality.
+
+**Observations / Lessons Learned:**
+
+* **Bridge mode** is essential for VM accessibility from the host machine.
+* Browser compatibility can affect dashboard access; Safari worked when Chrome did not.
+* Wazuh credentials are stored securely in the **OpenSearch keystore** and cannot be accessed directly.
+* Restarting services after configuration changes ensures that all components reflect updates correctly.
+
+
